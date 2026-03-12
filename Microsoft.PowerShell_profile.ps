@@ -1,0 +1,142 @@
+# (Do Git Stuff) Git commit - stage all, show status, commit with message
+function dgs {
+    git add -A
+    git status
+    git commit -m "$args"
+}
+
+# Git reset - undo last commit (keeps changes staged)
+function gr {
+    git reset HEAD~1
+}
+
+# Git merge branch - fetch, pull all, then merge specified or develop branch
+function gmb {
+    param([string]$branch)
+
+    git fetch origin
+    git pull --all
+
+    if ($branch) {
+        git merge $branch
+    } else {
+        git merge origin/develop
+    }
+}
+
+# Git status
+function gst { git status }
+
+# Git push
+function gip { git push }
+
+# Git branch
+function gb { git branch }
+
+# Git fetch and pull
+function gfp { git fetch; git pull }
+
+# Git switch - fetch, switch, then pull to sync the branch
+function gs { 
+    git switch $args
+    git fetch
+    git pull
+}
+
+# Git stash - stash all files (tracked + untracked) with optional message
+function gst {
+    param([string]$message)
+    
+    if ($message) {
+        git stash push -u -m "$message"
+    } else {
+        git stash push -u
+    }
+}
+
+# Docker Compose up - start services in background
+function dcu { docker compose up -d }
+
+# Docker Compose down - stop and remove containers
+function dcd { docker compose down }
+
+# Docker Compose down - stop and remove containers and volumes
+function dcdv { docker compose down -v }
+
+# Docker Compose logs - view live logs from all services
+function dcl { docker compose logs -f }
+
+# Docker Compose Vendor up - start vendor services in background
+function dcvu { docker compose -f docker-compose.vendor.yml up -d }
+
+# Docker Compose Vendor down - stop and remove vendor containers
+function dcvd { docker compose -f docker-compose.vendor.yml down }
+
+# Docker Compose Vendor down - stop and remove vendor containers and volumes
+function dcvdv { docker compose -f docker-compose.vendor.yml down -v }
+
+# Docker Compose Vendor logs - view live logs from vendor services
+function dcvl { docker compose -f docker-compose.vendor.yml logs -f }
+
+# Flutter pub get - download and install dependencies
+function fpg { flutter pub get }
+
+# Flutter clean - delete build directory and artifacts
+function fc { flutter clean }
+
+# Flutter analyze - run static analysis on Dart code
+function fa { flutter analyze }
+
+# VS Code - open PowerShell profile in VS Code
+function np { code $PROFILE }
+
+# Clear - clear console screen
+function c { clear }
+
+# Dotnet run - start the application
+function dr { 
+    $projFile = Get-ChildItem -Filter "*.csproj" -File | Select-Object -First 1
+    if ($projFile) {
+        dotnet run --project $projFile.FullName
+    } else {
+        dotnet run
+    }
+}
+
+# Dotnet EF - create migration with name
+function dcm { dotnet ef migrations add $args }
+
+# Dotnet EF - update database to latest migration
+function dud { dotnet ef database update }
+
+# Dotnet EF - remove last migration
+function dmr { dotnet ef migrations remove }
+
+# Dotnet EF - list all migrations
+function dml { dotnet ef migrations list }
+
+# Dotnet restore - automatically find .sln and restore
+function dres { 
+    $slnFile = Get-ChildItem -Filter "*.sln" -File | Select-Object -First 1
+    if ($slnFile) {
+        dotnet restore $slnFile.FullName
+    } else {
+        dotnet restore
+    }
+}
+
+# Dotnet build - automatically find .sln and build
+function dbu { 
+    $slnFile = Get-ChildItem -Filter "*.sln" -File | Select-Object -First 1
+    if ($slnFile) {
+        dotnet build $slnFile.FullName
+    }
+}
+
+# IP Config - show Wi-Fi IPv4 address only
+function ip { 
+    Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi" | Select-Object -ExpandProperty IPAddress
+}
+
+# Update Profile - reload PowerShell profile
+function up { . $PROFILE }
