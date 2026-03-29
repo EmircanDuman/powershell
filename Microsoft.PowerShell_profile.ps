@@ -10,6 +10,23 @@ function gr {
     git reset HEAD~1
 }
 
+# Git switch branch develop - switch to develop branch
+function gswbd {
+    git switch develop
+}
+
+# Git switch - switch to existing branch
+function gswb {
+    param([string]$branch)
+    git switch $branch
+}
+
+# Git switch create - create and switch to new branch
+function gswbc {
+    param([string]$branch)
+    git switch -c $branch
+}
+
 # Git merge branch - fetch, pull all, then merge specified or develop branch
 function gmb {
     param([string]$branch)
@@ -24,11 +41,22 @@ function gmb {
     }
 }
 
+# Git commit - commit with message
+function gicm {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$message
+    )
+
+    $commitMessage = $message -join " "
+    git commit -m "$commitMessage"
+}
+
 # Git status
 function gst { git status }
 
 # Git push
-function gip { git push }
+function gpu { git push }
 
 # Git branch
 function gb { git branch }
@@ -36,22 +64,44 @@ function gb { git branch }
 # Git fetch and pull
 function gfp { git fetch; git pull }
 
-# Git switch - fetch, switch, then pull to sync the branch
-function gs { 
-    git switch $args
-    git fetch
-    git pull
-}
-
 # Git stash - stash all files (tracked + untracked) with optional message
-function gst {
-    param([string]$message)
+function gstu {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$message
+    )
     
-    if ($message) {
-        git stash push -u -m "$message"
+    $stashMessage = $message -join " "
+    if ($stashMessage) {
+        git stash push -u -m "$stashMessage"
     } else {
         git stash push -u
     }
+}
+
+# Git stash pop - apply latest stash and remove it from the stash list
+function gstp {
+    git stash pop
+}
+
+# Git stash list - show all stashes
+function gstl {
+    git stash list
+}
+
+# Git stash clear - remove all stashes
+function gstc {
+    git stash clear
+}
+
+# Git stash show - show changes in latest stash as a patch
+function gsts {
+    git stash show -p
+}
+
+# Git stash apply - apply latest stash without removing it from the stash list
+function gsta {
+    git stash apply
 }
 
 # Docker Compose up - start services in background
@@ -82,11 +132,20 @@ function dcvl { docker compose -f docker-compose.vendor.yml logs -f }
 function fpg { flutter pub get }
 
 # Flutter clean - delete build directory and artifacts
-function fc { flutter clean }
+function flc { Invoke-Expression "flutter clean" }
 
 # Flutter analyze - run static analysis on Dart code
 function fa { flutter analyze }
 
+# Flutter run optional environment - start the application with optional environment variable
+function frev {
+    param([string]$ENV)
+    if ($ENV) {
+        flutter run --dart-define=ENV=$ENV
+    } else {
+        flutter run
+    }
+}
 # VS Code - open PowerShell profile in VS Code
 function np { code $PROFILE }
 
@@ -136,6 +195,25 @@ function dbu {
 # IP Config - show Wi-Fi IPv4 address only
 function ip { 
     Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi" | Select-Object -ExpandProperty IPAddress
+}
+
+function db {
+    $process = Get-Process dbeaver -ErrorAction SilentlyContinue
+    if ($process) {
+        # Bring existing window to front
+        $hwnd = $process.MainWindowHandle
+        Add-Type @"
+            using System;
+            using System.Runtime.InteropServices;
+            public class Win32 {
+                [DllImport("user32.dll")]
+                public static extern bool SetForegroundWindow(IntPtr hWnd);
+            }
+"@
+        [Win32]::SetForegroundWindow($hwnd) | Out-Null
+    } else {
+        Start-Process "C:\Users\EmircanDuman\AppData\Local\DBeaver\dbeaver.exe"
+    }
 }
 
 # Update Profile - reload PowerShell profile
